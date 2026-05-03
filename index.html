@@ -3852,7 +3852,14 @@ $('btnRetakeVid').addEventListener('click', () => {
   $('btnSubmitVid').classList.add('hidden');
   $('vidChosen').style.display = 'none';
 });
-$('btnSubmitVid').addEventListener('click', () => { $('toStep3').click(); });
+function continueToDelivery() {
+  if (S.format === 'video' && !S.videoURL) return alert('Record or upload a video first.');
+  if (S.format === 'audio' && !S.audioURL) return alert('Record or upload audio first.');
+  if (S.format === 'text'  && !S.text.trim()) return alert('Write a message first.');
+  buildPreview();
+  showStep(4);
+}
+$('btnSubmitVid').addEventListener('click', continueToDelivery);
 $('vidFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   revoke(S.videoURL); S.videoBlob = f; S.videoURL = URL.createObjectURL(f);
@@ -3925,7 +3932,7 @@ $('audioFile').addEventListener('change', e => {
   $('btnAudioRetake').classList.remove('hidden');
   $('btnSubmitAud').classList.remove('hidden');
 });
-$('btnSubmitAud').addEventListener('click', () => { $('toStep3').click(); });
+$('btnSubmitAud').addEventListener('click', continueToDelivery);
 
 /* text */
 $('textMsg').addEventListener('input', e => {
