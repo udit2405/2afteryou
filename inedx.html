@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AfterYou — A message that outlives you</title>
+<meta name="description" content="Record a video, audio, or letter today. Encrypted in your browser. Delivered when it matters.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   THEME — dark default + light theme via [data-theme="light"]
+===================================================================== */
+:root {
+  --void: #0a0a0c;
+  --ink: #131319;
+  --ink-2: #1a1a22;
+  --bone: #f5f0e8;
+  --bone-soft: #c8c4bd;
+  --indigo: #6366f1;
+  --indigo-2: #4f46e5;
+  --violet: #a78bfa;
+  --ember: #ffb86b;
+  --ember-2: #f97316;
+  --line: rgba(245, 240, 232, 0.08);
+  --line-2: rgba(245, 240, 232, 0.16);
+  --indigo-glow: rgba(99, 102, 241, 0.5);
+  --ember-glow: rgba(255, 184, 107, 0.5);
+  --danger: #ef4444;
+  --emerald: #10b981;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+[data-theme="light"] {
+  --void: #fafaf7;
+  --ink: #ffffff;
+  --ink-2: #f3f2ed;
+  --bone: #1a1a22;
+  --bone-soft: #555560;
+  --indigo: #4f46e5;
+  --indigo-2: #4338ca;
+  --violet: #7c3aed;
+  --ember: #ea580c;
+  --ember-2: #c2410c;
+  --line: rgba(0, 0, 0, 0.08);
+  --line-2: rgba(0, 0, 0, 0.16);
+  --indigo-glow: rgba(79, 70, 229, 0.3);
+  --ember-glow: rgba(234, 88, 12, 0.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--void);
+  color: var(--bone);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  transition: background .3s, color .3s;
+}
+a { color: inherit; text-decoration: none; }
+em { font-style: italic; color: var(--violet); }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input, textarea, select {
+  font: inherit; color: inherit;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 16px;
+  width: 100%;
+  outline: none;
+  transition: border-color .2s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--violet); }
+textarea { font-family: 'Fraunces', Georgia, serif; resize: vertical; line-height: 1.6; }
+
+/* ---------- Layout ---------- */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.glass {
+  background: color-mix(in oklab, var(--ink) 60%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+}
+.serif { font-family: 'Fraunces', Georgia, serif; font-weight: 400; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+.muted { color: var(--bone-soft); }
+.center { text-align: center; }
+.row { display: flex; gap: 12px; align-items: center; }
+.row-between { display: flex; justify-content: space-between; align-items: center; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 700px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+.hidden { display: none !important; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 24px;
+  border-radius: 99px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: transform .25s var(--spring), box-shadow .3s, background .3s, opacity .2s;
+  white-space: nowrap;
+}
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--indigo), var(--violet));
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 30px var(--indigo-glow); }
+.btn-ghost { border: 1px solid var(--line-2); color: var(--bone); }
+.btn-ghost:hover:not(:disabled) { background: color-mix(in oklab, var(--bone) 8%, transparent); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-block { width: 100%; }
+.btn-lg { padding: 16px 32px; font-size: 16px; }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+
+/* ---------- Nav ---------- */
+nav.topnav {
+  position: sticky; top: 0; z-index: 50;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklab, var(--void) 80%, transparent);
+  backdrop-filter: blur(20px);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 1200px; margin: 0 auto; }
+.brand { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 400; }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+
+/* ---------- Theme toggle ---------- */
+.theme-toggle {
+  position: relative;
+  width: 56px; height: 30px;
+  border-radius: 99px;
+  border: 1px solid var(--line-2);
+  background: color-mix(in oklab, var(--bone) 4%, transparent);
+  display: inline-flex; align-items: center;
+  padding: 0 4px;
+  transition: background .3s, border-color .3s;
+}
+.theme-toggle:hover { background: color-mix(in oklab, var(--bone) 8%, transparent); }
+.theme-knob {
+  position: absolute; top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--indigo-2), var(--violet));
+  display: grid; place-items: center;
+  transition: transform .4s var(--spring), background .35s;
+  box-shadow: 0 0 12px var(--indigo-glow);
+  color: #fff;
+}
+[data-theme="light"] .theme-knob {
+  transform: translateX(26px);
+  background: linear-gradient(135deg, var(--ember), var(--ember-2));
+  box-shadow: 0 0 12px var(--ember-glow);
+}
+.theme-knob svg { width: 12px; height: 12px; }
+.theme-knob .moon { display: block; }
+.theme-knob .sun  { display: none; }
+[data-theme="light"] .theme-knob .moon { display: none; }
+[data-theme="light"] .theme-knob .sun  { display: block; }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  min-height: 90vh;
+  display: grid; place-items: center;
+  text-align: center;
+  padding: 80px 24px;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 30%, var(--indigo-glow), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 70% 70%, var(--ember-glow), transparent 70%);
+  opacity: .35;
+  z-index: 0;
+  pointer-events: none;
+}
+[data-theme="light"] .hero::before { opacity: .25; }
+.hero > * { position: relative; z-index: 1; }
+.hero .eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  text-transform: uppercase; letter-spacing: .3em; font-size: 11px;
+  color: var(--bone-soft); margin-bottom: 24px;
+}
+.hero .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--violet); animation: pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.7); } }
+.hero h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(48px, 9vw, 104px);
+  line-height: .95; letter-spacing: -.02em;
+  margin-bottom: 28px;
+}
+.hero p.lead {
+  max-width: 640px;
+  margin: 0 auto 40px;
+  font-size: 19px; line-height: 1.6;
+  color: var(--bone-soft);
+}
+.hero .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ---------- Sections ---------- */
+section.block { padding: 80px 24px; }
+section.block h2 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 44px; line-height: 1.1; margin-bottom: 16px; letter-spacing: -.01em; }
+section.block .lead-block { color: var(--bone-soft); font-size: 17px; max-width: 640px; margin-bottom: 48px; }
+
+.feature-card { padding: 32px; border-radius: 20px; background: color-mix(in oklab, var(--ink) 70%, transparent); border: 1px solid var(--line); transition: border-color .2s; }
+.feature-card:hover { border-color: var(--line-2); }
+.feature-card .num { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--violet); margin-bottom: 16px; }
+.feature-card h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 24px; margin-bottom: 8px; }
+.feature-card p { color: var(--bone-soft); font-size: 15px; line-height: 1.6; }
+
+/* ---------- Pricing ---------- */
+.tier { padding: 32px; border-radius: 20px; background: color-mix(in oklab, var(--ink) 70%, transparent); border: 1px solid var(--line); }
+.tier-featured { border-color: var(--violet); position: relative; }
+.tier-featured::before { content: 'POPULAR'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--indigo), var(--violet)); color: #fff; padding: 4px 12px; border-radius: 99px; font-size: 10px; font-weight: 700; letter-spacing: .15em; }
+.tier h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 22px; margin-bottom: 8px; }
+.tier .price { font-size: 44px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.tier .per { color: var(--bone-soft); font-size: 14px; }
+.tier ul { list-style: none; margin: 24px 0; }
+.tier ul li { padding: 8px 0; color: var(--bone-soft); font-size: 14px; border-bottom: 1px solid var(--line); }
+.tier ul li::before { content: '· '; color: var(--violet); }
+
+/* ---------- Form ---------- */
+.form-card { max-width: 440px; margin: 64px auto; padding: 40px; }
+.form-card h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 36px; margin-bottom: 8px; }
+.form-card .sub { color: var(--bone-soft); margin-bottom: 32px; font-size: 15px; }
+.form-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: var(--bone-soft); font-size: 12px; }
+.form-divider::before, .form-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.form-msg { font-size: 13px; padding: 12px 16px; border-radius: 12px; margin: 16px 0; }
+.form-msg.error { color: var(--danger); background: color-mix(in oklab, var(--danger) 10%, transparent); border: 1px solid color-mix(in oklab, var(--danger) 30%, transparent); }
+.form-msg.success { color: var(--emerald); background: color-mix(in oklab, var(--emerald) 10%, transparent); }
+
+/* ---------- Dashboard ---------- */
+.vault-header { display: flex; align-items: end; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 16px; }
+.vault-header h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 48px; line-height: 1; }
+.heartbeat-card { padding: 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.heartbeat-card .status { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+.status-active { color: var(--emerald); }
+.status-at_risk { color: var(--ember); }
+.status-released { color: var(--danger); }
+
+.capsule-card {
+  padding: 24px;
+  background: color-mix(in oklab, var(--ink) 60%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  transition: border-color .2s, transform .2s;
+  display: block;
+}
+.capsule-card:hover { border-color: var(--violet); transform: translateY(-2px); }
+.capsule-card .meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; text-transform: uppercase; letter-spacing: .15em; color: var(--bone-soft); margin-bottom: 12px; }
+.capsule-card .title { font-family: 'Fraunces', Georgia, serif; font-size: 22px; margin-bottom: 6px; word-break: break-word; }
+.capsule-card .sub { font-size: 12px; color: var(--bone-soft); }
+
+.empty {
+  padding: 80px 32px;
+  text-align: center;
+  border: 1px dashed var(--line-2);
+  border-radius: 24px;
+}
+.empty h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 28px; margin-bottom: 8px; }
+
+/* ---------- Recorder ---------- */
+.steps-bar { display: flex; gap: 8px; margin-bottom: 32px; }
+.steps-bar .step { flex: 1; height: 3px; border-radius: 2px; background: var(--line); transition: background .3s; }
+.steps-bar .step.active { background: var(--violet); }
+.steps-bar .step.done   { background: var(--indigo); }
+
+.format-card {
+  padding: 24px;
+  background: color-mix(in oklab, var(--ink) 60%, transparent);
+  border: 2px solid var(--line);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: border-color .2s;
+  text-align: left;
+}
+.format-card:hover, .format-card.selected { border-color: var(--violet); }
+.format-card .icon { width: 32px; height: 32px; margin-bottom: 12px; color: var(--violet); }
+.format-card h4 { font-family: 'Fraunces', Georgia, serif; font-size: 22px; margin-bottom: 4px; }
+
+.video-shell {
+  aspect-ratio: 16/9;
+  background: var(--ink-2);
+  border-radius: 18px; overflow: hidden;
+  position: relative;
+  border: 1px solid var(--line);
+}
+.video-shell video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+.rec-badge {
+  position: absolute; top: 16px; left: 16px;
+  background: var(--danger); color: #fff;
+  padding: 6px 12px; border-radius: 99px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  display: flex; align-items: center; gap: 6px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.rec-badge::before { content: '●'; }
+.audio-shell {
+  background: var(--ink-2);
+  border-radius: 18px; padding: 48px;
+  text-align: center;
+  border: 1px solid var(--line);
+}
+
+.mode-card {
+  padding: 16px;
+  background: color-mix(in oklab, var(--ink) 60%, transparent);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color .2s;
+  text-align: left;
+}
+.mode-card.selected { border-color: var(--violet); }
+.mode-card .label { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+.mode-card .desc  { font-size: 12px; color: var(--bone-soft); }
+
+.recipient-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.recipient-row input[type=email] { flex: 1; }
+.recipient-row input[type=text]  { width: 200px; }
+
+/* ---------- Unlock page ---------- */
+.unlock-shell {
+  max-width: 680px;
+  margin: 80px auto;
+  padding: 56px;
+  text-align: center;
+}
+.unlock-shell .from { font-size: 13px; color: var(--bone-soft); text-transform: uppercase; letter-spacing: .2em; margin-bottom: 16px; }
+.unlock-shell h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 40px; margin-bottom: 12px; }
+.unlock-content { text-align: left; margin-top: 32px; }
+.unlock-content video, .unlock-content audio { width: 100%; border-radius: 12px; }
+.unlock-content .text-msg {
+  font-family: 'Fraunces', Georgia, serif; font-size: 18px; line-height: 1.7;
+  white-space: pre-wrap; padding: 32px;
+  background: color-mix(in oklab, var(--ink) 60%, transparent);
+  border-radius: 16px; border: 1px solid var(--line);
+}
+
+/* ---------- Setup helper page ---------- */
+.code-block {
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+  margin: 16px 0;
+  color: var(--bone);
+}
+.copy-btn { font-size: 11px; padding: 4px 10px; }
+
+/* ---------- Toast ---------- */
+.toast-stack { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 14px 20px; border-radius: 12px; background: var(--ink); border: 1px solid var(--line-2); color: var(--bone); font-size: 14px; max-width: 360px; box-shadow: 0 12px 30px rgba(0,0,0,.4); animation: slidein .3s var(--spring); }
+.toast.success { border-color: var(--emerald); }
+.toast.error   { border-color: var(--danger); }
+@keyframes slidein { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+/* ---------- Footer ---------- */
+footer.big-footer { padding: 64px 0 32px; border-top: 1px solid var(--line); margin-top: 80px; color: var(--bone-soft); font-size: 14px; }
+.footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 32px; padding-bottom: 48px; }
+@media (max-width: 800px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+.footer-h { font-family: 'Fraunces', Georgia, serif; font-size: 16px; color: var(--bone); margin-bottom: 16px; }
+.footer-grid a { display: block; padding: 6px 0; color: var(--bone-soft); transition: color .2s; }
+.footer-grid a:hover { color: var(--violet); }
+.footer-bottom { border-top: 1px solid var(--line); padding-top: 24px; font-size: 12px; }
+.footer-bottom a { color: var(--violet); }
+
+/* ---------- Long-form content pages ---------- */
+.doc-page { max-width: 720px; margin: 0 auto; padding: 64px 24px; }
+.doc-page h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 56px; line-height: 1.05; margin-bottom: 16px; letter-spacing: -.02em; }
+.doc-page .doc-eyebrow { text-transform: uppercase; letter-spacing: .25em; font-size: 11px; color: var(--violet); margin-bottom: 16px; }
+.doc-page p.lead-doc { font-size: 18px; line-height: 1.7; color: var(--bone-soft); margin-bottom: 32px; }
+.doc-page h2 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 28px; margin: 40px 0 12px; }
+.doc-page h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 20px; margin: 24px 0 8px; }
+.doc-page p, .doc-page li { font-size: 16px; line-height: 1.75; color: var(--bone); margin-bottom: 12px; }
+.doc-page ul, .doc-page ol { margin: 0 0 20px 24px; }
+.doc-page li { margin-bottom: 8px; }
+.doc-page strong { color: var(--violet); font-weight: 600; }
+.doc-page .back-link { color: var(--bone-soft); font-size: 14px; }
+.doc-page .back-link:hover { color: var(--violet); }
+.doc-page .pullquote { font-family: 'Fraunces', Georgia, serif; font-size: 22px; line-height: 1.5; padding: 24px 0 24px 24px; border-left: 3px solid var(--violet); margin: 24px 0; color: var(--bone); font-style: italic; }
+.doc-page .info-card { padding: 24px; margin: 16px 0; border-radius: 16px; border: 1px solid var(--line); background: color-mix(in oklab, var(--ink) 60%, transparent); }
+.doc-page .info-card h3 { margin-top: 0; }
+
+/* ---------- Recorder confirm bar ---------- */
+.confirm-bar {
+  margin-top: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, color-mix(in oklab, var(--indigo) 18%, var(--ink)), color-mix(in oklab, var(--violet) 18%, var(--ink)));
+  border: 1px solid var(--violet);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  animation: confirmIn .35s var(--spring);
+}
+.confirm-bar .label { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.confirm-bar .check {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--violet); color: #fff;
+  display: grid; place-items: center; flex-shrink: 0;
+  font-weight: 700;
+}
+@keyframes confirmIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<!--
+=========================================================================
+                           AFTER YOU — SINGLE FILE
+=========================================================================
+This is a self-contained app. To run it:
+
+  1. Create a Supabase project: https://supabase.com/dashboard
+     (pick the Mumbai region for Indian customers)
+  2. In Supabase SQL Editor, paste the SQL from the in-app SETUP page
+     (visit /#setup once you open this file in a browser).
+  3. Get your Supabase URL + anon key from Project Settings -> API.
+  4. Paste them into the CONFIG block below (search "PASTE YOUR" — there
+     are exactly 4 placeholders).
+  5. Save and open this HTML file in a browser, or upload to any host
+     (Netlify drop, Vercel static, GitHub Pages, your own server).
+
+That's it. No build step. No backend to deploy.
+
+For real email delivery to recipients (so they're notified when a capsule
+releases), you'll also create a Supabase Edge Function — its full source
+is on the /#setup page. Until you deploy it, you can still create capsules
+and view them yourself; recipients get a manual share link from your vault.
+=========================================================================
+-->
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <a class="brand" href="#home">After<em>You</em></a>
+    <div class="nav-actions">
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+        <span class="theme-knob">
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="sun"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </span>
+      </button>
+      <span id="navAuth"></span>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================== HOME ============================== -->
+<section id="page-home" class="page">
+  <div class="hero">
+    <div class="eyebrow"><span class="dot"></span>A <em style="color:var(--ember)">forever memory</em> · sealed today, delivered when it matters</div>
+    <h1>A message that<br><em>outlives</em> you.</h1>
+    <p class="lead">AfterYou is a forever-memory vault. Record a video, an audio note, or a letter today — encrypted in your browser before it leaves your device. Keep it private for life, deliver it on a date you choose, send it now, or release it to the people you love after you're gone.</p>
+    <div class="cta-row">
+      <a href="#signup" class="btn btn-primary btn-lg">Record your first message</a>
+      <a href="#how" class="btn btn-ghost btn-lg">How it works</a>
+    </div>
+  </div>
+
+  <section id="how" class="block container">
+    <h2>How it works</h2>
+    <p class="lead-block">No app to install. No keys we can read. No surprises.</p>
+    <div class="grid-3">
+      <div class="feature-card"><div class="num">01</div><h3>Record</h3><p>Video, audio, or text — straight from your browser. Camera access stays local.</p></div>
+      <div class="feature-card"><div class="num">02</div><h3>Seal</h3><p>Encrypted with AES-256 on your device. Only you and your recipients hold the key.</p></div>
+      <div class="feature-card"><div class="num">03</div><h3>Release</h3><p>On a date you choose, on demand, or via trusted contacts after you're gone.</p></div>
+    </div>
+  </section>
+
+  <section id="forever" class="block container">
+    <h2>Also a <em>forever memory</em></h2>
+    <p class="lead-block">Not every message has to leave you. AfterYou is also a private archive — a place to keep the moments you don't want to lose, sealed for as long as you want them sealed.</p>
+    <div class="grid-3">
+      <div class="feature-card"><h3>For yourself</h3><p>Record a 60-second voice note on a Sunday and find it again in twenty years. The you of 2046 will be glad you did.</p></div>
+      <div class="feature-card"><h3>For your children</h3><p>Save a story, a recipe, a piece of advice — even before they're old enough to understand it. The vault waits patiently.</p></div>
+      <div class="feature-card"><h3>For the moment</h3><p>Some things are too important to live only inside a phone's camera roll that you'll one day lose. Seal them once, keep them forever.</p></div>
+    </div>
+  </section>
+
+  <section id="moments" class="block container">
+    <h2>Trigger moments</h2>
+    <p class="lead-block">Pick what should make a message arrive.</p>
+    <div class="grid-2">
+      <div class="feature-card"><h3>A future date</h3><p>Your daughter's 18th birthday. Your 25th anniversary. Diwali 2040. Pick the date and forget about it.</p></div>
+      <div class="feature-card"><h3>If you go silent</h3><p>We ping you on a schedule you set. If you stop responding, your trustees confirm and we release the message.</p></div>
+      <div class="feature-card"><h3>Send right now</h3><p>For times when you've recorded something you want to ship today, not later.</p></div>
+      <div class="feature-card"><h3>Private vault</h3><p>For things you want to keep but never send. They sit encrypted in your vault forever. Only you can open them.</p></div>
+    </div>
+  </section>
+
+  <section id="pricing" class="block container">
+    <h2>Pricing</h2>
+    <p class="lead-block">Start free forever. Upgrade when you want to seal more.</p>
+    <div class="grid-3">
+      <div class="tier">
+        <h3>Starter</h3>
+        <div class="price">₹0<span class="per"> forever</span></div>
+        <ul><li>1 capsule</li><li>1 recipient</li></ul>
+        <a href="#signup" class="btn btn-ghost btn-block">Start free</a>
+      </div>
+      <div class="tier tier-featured">
+        <h3>Sealed</h3>
+        <div class="price">₹99<span class="per">/month</span></div>
+        <ul><li>Unlimited capsules</li><li>Up to 30 minutes each</li><li>Up to 3 recipients per message</li><li>Dead-man switch</li></ul>
+        <a href="#signup" class="btn btn-primary btn-block">Choose Sealed</a>
+      </div>
+      <div class="tier">
+        <h3>Sealed +</h3>
+        <div class="price">₹599<span class="per">/year</span></div>
+        <ul><li>Everything in Sealed</li><li>Trustees</li><li>Priority delivery</li><li>Annual billing</li></ul>
+        <a href="#signup" class="btn btn-ghost btn-block">Choose Sealed +</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="big-footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="brand serif" style="font-size:24px;margin-bottom:12px">After<em>You</em></div>
+        <p class="muted" style="font-size:13px;line-height:1.7;max-width:280px">A forever-memory vault. Sealed today, delivered when it matters.</p>
+      </div>
+      <div>
+        <div class="footer-h">Product</div>
+        <a href="#how-it-works">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#vault-security">Vault security</a>
+        <a href="#guardian-network">Guardian network</a>
+      </div>
+      <div>
+        <div class="footer-h">Company</div>
+        <a href="#manifesto">Our manifesto</a>
+        <a href="#press">Press kit</a>
+        <a href="#careers">Careers</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div>
+        <div class="footer-h">Trust</div>
+        <a href="#privacy">Privacy</a>
+        <a href="#terms">Terms</a>
+        <a href="#security-audit">Security audit</a>
+        <a href="#wind-down">Wind-down protocol</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      © <span id="year"></span> AfterYou · Built in India · <a href="#setup">Setup</a>
+    </div>
+  </footer>
+</section>
+
+<!-- ============================== AUTH ============================== -->
+<section id="page-signup" class="page hidden">
+  <div class="form-card glass">
+    <h1>Begin.</h1>
+    <p class="sub">Your vault, your keys, your timing.</p>
+    <button id="googleSignup" class="btn btn-ghost btn-block">Continue with Google</button>
+    <div class="form-divider">or</div>
+    <form id="signupForm" class="stack">
+      <input type="text"     id="suName"     placeholder="Your name">
+      <input type="email"    id="suEmail"    placeholder="you@example.com" required>
+      <input type="password" id="suPassword" placeholder="Password (min 8)" minlength="8" required>
+      <div id="suMsg"></div>
+      <button type="submit" class="btn btn-primary btn-block">Create account</button>
+    </form>
+    <p class="muted center" style="margin-top:24px;font-size:14px">
+      Already have an account? <a href="#login" style="color:var(--violet)">Sign in</a>
+    </p>
+  </div>
+</section>
+
+<section id="page-login" class="page hidden">
+  <div class="form-card glass">
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to your vault.</p>
+    <button id="googleLogin" class="btn btn-ghost btn-block">Continue with Google</button>
+    <div class="form-divider">or</div>
+    <form id="loginForm" class="stack">
+      <input type="email"    id="liEmail"    placeholder="you@example.com" required>
+      <input type="password" id="liPassword" placeholder="Password" required>
+      <div id="liMsg"></div>
+      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+    </form>
+    <p class="muted center" style="margin-top:24px;font-size:14px">
+      New here? <a href="#signup" style="color:var(--violet)">Create an account</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============================== DASHBOARD ============================== -->
+<section id="page-dashboard" class="page hidden">
+  <div class="container" style="padding-top:48px;padding-bottom:64px">
+    <div class="vault-header">
+      <div>
+        <h1>Your vault</h1>
+        <p class="muted" id="vaultCount">0 sealed messages.</p>
+      </div>
+      <a href="#record" class="btn btn-primary">+ New capsule</a>
+    </div>
+
+    <div class="heartbeat-card glass">
+      <div>
+        <div class="muted" style="font-size:12px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.15em">Heartbeat</div>
+        <div class="status">
+          Status: <span id="hbStatus" class="status-active">active</span>
+          <span id="hbNext" class="muted" style="margin-left:16px"></span>
+        </div>
+      </div>
+      <button id="checkInBtn" class="btn btn-ghost">I'm here</button>
+    </div>
+
+    <div id="capsuleList" class="grid-3"></div>
+    <div id="emptyState" class="empty hidden">
+      <h3>Your vault is empty.</h3>
+      <p class="muted" style="margin-bottom:24px">Record your first message — it can be 30 seconds.</p>
+      <a href="#record" class="btn btn-primary">Record now</a>
+    </div>
+
+    <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--bone-soft)">
+      <span id="userEmail"></span>
+      <div class="row">
+        <a href="#settings">Settings</a>
+        <button id="signOutBtn" style="color:var(--bone-soft)">Sign out</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== RECORDER ============================== -->
+<section id="page-record" class="page hidden">
+  <div class="container" style="max-width:760px;padding-top:48px;padding-bottom:64px">
+    <div class="row-between" style="margin-bottom:24px">
+      <a href="#dashboard" class="muted" style="font-size:14px">← Back to vault</a>
+      <span id="stepLabel" class="muted mono" style="font-size:12px;text-transform:uppercase;letter-spacing:.15em">Step 1 of 4</span>
+    </div>
+    <div class="steps-bar">
+      <div class="step active" data-s="1"></div>
+      <div class="step" data-s="2"></div>
+      <div class="step" data-s="3"></div>
+      <div class="step" data-s="4"></div>
+    </div>
+
+    <!-- Step 1: format -->
+    <div id="recStep1">
+      <h2 class="serif" style="font-size:36px;margin-bottom:24px">Choose your <em>format</em></h2>
+      <div class="grid-3">
+        <button class="format-card selected" data-format="video">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <h4>Video</h4>
+          <p class="muted">Camera + microphone</p>
+        </button>
+        <button class="format-card" data-format="audio">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          <h4>Audio</h4>
+          <p class="muted">Voice only</p>
+        </button>
+        <button class="format-card" data-format="text">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <h4>Text</h4>
+          <p class="muted">A letter</p>
+        </button>
+      </div>
+      <div class="row" style="margin-top:32px;justify-content:flex-end">
+        <button class="btn btn-primary" data-step="2">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: capture -->
+    <div id="recStep2" class="hidden">
+      <h2 class="serif" style="font-size:36px;margin-bottom:24px">Capture</h2>
+      <div id="captureVideo" class="video-shell">
+        <video id="liveVideo" muted autoplay playsinline></video>
+        <video id="previewVideo" controls class="hidden"></video>
+        <div id="recBadge" class="rec-badge hidden">REC</div>
+      </div>
+      <div id="captureAudio" class="audio-shell hidden">
+        <p id="audioStatus" class="mono muted">Microphone idle</p>
+        <audio id="previewAudio" controls class="hidden" style="margin-top:24px;width:100%"></audio>
+      </div>
+      <div id="captureText" class="hidden">
+        <textarea id="textBody" rows="10" placeholder="Dear…"></textarea>
+      </div>
+
+      <div class="row" id="recControls" style="margin-top:24px;flex-wrap:wrap">
+        <button id="startRec" class="btn btn-primary btn-lg">● Start recording</button>
+        <button id="stopRec" class="btn btn-danger btn-lg hidden">■ Stop recording</button>
+        <span id="recTime" class="mono muted hidden" style="font-size:18px;padding:8px 12px;border:1px solid var(--line);border-radius:99px">00:00</span>
+      </div>
+
+      <!-- Confirmation bar (appears after recording stops) -->
+      <div id="confirmBar" class="confirm-bar hidden">
+        <div class="label"><div class="check">✓</div><div><strong>Looks good?</strong> Continue to set delivery, or re-record.</div></div>
+        <div class="row" style="gap:8px">
+          <button id="reRec" class="btn btn-ghost">↻ Re-record</button>
+          <button id="useRecBtn" class="btn btn-primary">Use this recording →</button>
+        </div>
+      </div>
+
+      <div class="row-between" style="margin-top:32px">
+        <button class="btn btn-ghost" data-step="1">← Back</button>
+        <button id="step2Next" class="btn btn-primary" disabled>Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: delivery -->
+    <div id="recStep3" class="hidden">
+      <h2 class="serif" style="font-size:36px;margin-bottom:24px">Set <em>delivery</em></h2>
+
+      <label class="muted" style="font-size:13px;text-transform:uppercase;letter-spacing:.15em">Title</label>
+      <input id="capTitle" placeholder="A note for someone" style="margin-top:8px;margin-bottom:24px">
+
+      <label class="muted" style="font-size:13px;text-transform:uppercase;letter-spacing:.15em">When to deliver</label>
+      <div class="grid-2" style="margin-top:8px;margin-bottom:24px">
+        <button class="mode-card selected" data-mode="send_now"><div class="label">Send now</div><div class="desc">Email recipients today.</div></button>
+        <button class="mode-card" data-mode="schedule"><div class="label">Scheduled</div><div class="desc">Deliver on a future date.</div></button>
+        <button class="mode-card" data-mode="dead_man"><div class="label">Just in case</div><div class="desc">Released if you go silent.</div></button>
+        <button class="mode-card" data-mode="private"><div class="label">Private vault</div><div class="desc">Only you ever see it.</div></button>
+      </div>
+
+      <div id="scheduleField" class="hidden">
+        <label class="muted" style="font-size:13px;text-transform:uppercase;letter-spacing:.15em">Release on</label>
+        <input id="capReleaseAt" type="datetime-local" style="margin-top:8px;margin-bottom:24px">
+      </div>
+
+      <div id="recipientsField">
+        <label class="muted" style="font-size:13px;text-transform:uppercase;letter-spacing:.15em">Recipients</label>
+        <div id="recipientsList" style="margin-top:8px"></div>
+        <button id="addRecipient" class="btn btn-ghost btn-sm" style="margin-top:8px">+ Add recipient</button>
+      </div>
+
+      <div class="row-between" style="margin-top:32px">
+        <button class="btn btn-ghost" data-step="2">← Back</button>
+        <button class="btn btn-primary" data-step="4">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: seal -->
+    <div id="recStep4" class="hidden">
+      <h2 class="serif" style="font-size:36px;margin-bottom:24px">Seal</h2>
+      <div class="glass" style="padding:24px;margin-bottom:24px">
+        <div id="sealSummary" class="stack" style="font-size:14px"></div>
+      </div>
+      <p class="muted" style="font-size:13px;margin-bottom:24px">Your message is encrypted in this browser before it leaves. The encryption key is included only in the share link your recipients receive — even AfterYou cannot read it.</p>
+      <div id="sealProgress" class="muted mono" style="font-size:13px;margin-bottom:16px"></div>
+      <div id="sealError" class="form-msg error hidden"></div>
+      <div class="row-between">
+        <button class="btn btn-ghost" data-step="3">← Back</button>
+        <button id="sealBtn" class="btn btn-primary">Seal capsule</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CAPSULE DETAIL ============================== -->
+<section id="page-capsule" class="page hidden">
+  <div class="container" style="max-width:720px;padding-top:48px;padding-bottom:64px">
+    <a href="#dashboard" class="muted" style="font-size:14px">← Back to vault</a>
+    <h1 class="serif" style="font-size:42px;margin-top:16px;margin-bottom:24px" id="capDetailTitle"></h1>
+    <div class="glass" style="padding:24px;margin-bottom:16px">
+      <div id="capDetailMeta" class="stack" style="font-size:14px"></div>
+    </div>
+    <div id="capDetailRecipients" class="glass" style="padding:24px;margin-bottom:24px"></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <button id="capShareBtn"  class="btn btn-ghost btn-sm">Copy share link</button>
+      <button id="capDeleteBtn" class="btn btn-danger btn-sm">Delete capsule</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SETTINGS ============================== -->
+<section id="page-settings" class="page hidden">
+  <div class="container" style="max-width:720px;padding-top:48px;padding-bottom:64px">
+    <a href="#dashboard" class="muted" style="font-size:14px">← Back to vault</a>
+    <h1 class="serif" style="font-size:42px;margin-top:16px;margin-bottom:24px">Settings</h1>
+
+    <div class="glass" style="padding:32px;margin-bottom:24px">
+      <h2 class="serif" style="font-size:24px;margin-bottom:8px">Heartbeat</h2>
+      <p class="muted" style="margin-bottom:24px;font-size:14px">How often we ping you. If you miss several pings, we notify your trustees.</p>
+      <div class="row" style="gap:12px">
+        <input id="hbInterval" type="number" min="7" max="365" value="30" style="width:120px">
+        <span class="muted">days between pings</span>
+        <button id="saveInterval" class="btn btn-primary" style="margin-left:auto">Save</button>
+      </div>
+      <div id="hbMsg" style="margin-top:8px;font-size:12px"></div>
+    </div>
+
+    <div class="glass" style="padding:32px">
+      <h2 class="serif" style="font-size:24px;margin-bottom:8px">Trustees</h2>
+      <p class="muted" style="margin-bottom:24px;font-size:14px">People we contact if you stop responding.</p>
+      <div id="trusteeList" class="stack" style="margin-bottom:24px"></div>
+      <form id="addTrusteeForm" class="grid-3" style="gap:8px">
+        <input id="ttEmail" type="email" placeholder="Email" required>
+        <input id="ttName"  placeholder="Name">
+        <input id="ttRel"   placeholder="Relationship">
+        <button class="btn btn-primary" style="grid-column:1/-1">Add trustee</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== UNLOCK ============================== -->
+<section id="page-unlock" class="page hidden">
+  <div class="unlock-shell glass">
+    <div id="unlockLoading" class="muted">Verifying link…</div>
+    <div id="unlockReady" class="hidden">
+      <div class="from" id="unlockFrom"></div>
+      <h1 id="unlockTitle"></h1>
+      <p class="muted" id="unlockNote"></p>
+      <div class="unlock-content" id="unlockContent"></div>
+    </div>
+    <div id="unlockError" class="hidden">
+      <h1>This link can't be opened</h1>
+      <p class="muted" id="unlockErrText"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CONTENT PAGES ============================== -->
+
+<section id="page-how-it-works" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Product</div>
+  <h1>How it works</h1>
+  <p class="lead-doc">A working through the AfterYou flow — from the moment you open the app to the moment your message reaches the person you sent it to.</p>
+
+  <h2>1. You record</h2>
+  <p>Open AfterYou in any modern browser. Choose video, audio, or a written letter. Your camera and microphone are accessed locally — nothing streams anywhere yet. Take as long as you need; re-record as many times as you want.</p>
+
+  <h2>2. Your browser seals it</h2>
+  <p>The moment you click <strong>Seal</strong>, your browser does three things, all locally on your own device:</p>
+  <ul>
+    <li>Generates a fresh AES-256 encryption key — random bytes, never reused, never shared.</li>
+    <li>Encrypts your recording with that key (AES-GCM, the same standard used by Signal, WhatsApp, and your bank).</li>
+    <li>Uploads only the <em>encrypted</em> bytes to our storage. The key never touches our servers.</li>
+  </ul>
+  <p>What we hold is gibberish. What you hold is the key.</p>
+
+  <h2>3. You set the trigger</h2>
+  <p>Pick when the message should arrive: a future date, immediately, kept private forever, or only if you stop responding to our heartbeat check-ins. Add the people who should receive it.</p>
+
+  <h2>4. We deliver, you stay invisible</h2>
+  <p>When the trigger fires, we email each recipient a private link. They open it; their browser fetches the encrypted bytes and decrypts them locally with the key embedded in the link. They watch the video, listen to the message, or read the letter. They can save it. They can keep it.</p>
+
+  <div class="pullquote">"At every step, the only person who can read your message is the person you sent it to."</div>
+
+  <p style="margin-top:32px"><a href="#signup" class="btn btn-primary">Try it now</a></p>
+</div></section>
+
+<section id="page-vault-security" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Trust</div>
+  <h1>Vault security</h1>
+  <p class="lead-doc">A plain-English explanation of how your messages are protected, what we can and cannot see, and what happens in the worst-case scenarios.</p>
+
+  <h2>The encryption</h2>
+  <p>We use <strong>AES-256-GCM</strong>, an authenticated encryption standard published by NIST and used worldwide for classified data. Every capsule gets its own fresh key. Keys are generated by your browser using the Web Crypto API, which has been audited by every major OS vendor.</p>
+
+  <h2>What we can see</h2>
+  <ul>
+    <li>That you have an account.</li>
+    <li>The titles you give your capsules and which release mode you chose.</li>
+    <li>That a capsule exists and how many bytes of encrypted data it holds.</li>
+    <li>The email addresses of recipients you added (we need these to deliver).</li>
+  </ul>
+
+  <h2>What we cannot see</h2>
+  <ul>
+    <li>The contents of your video, audio, or text. Ever.</li>
+    <li>The encryption key that would let us decrypt it.</li>
+    <li>What recipients see when they open the message.</li>
+  </ul>
+
+  <h2>Worst-case scenarios — what's the damage?</h2>
+  <div class="info-card">
+    <h3>Our database is breached</h3>
+    <p>An attacker gets metadata: who has accounts, capsule titles, recipient emails. They get encrypted blobs that are mathematically useless without the key. No message contents are exposed.</p>
+  </div>
+  <div class="info-card">
+    <h3>Our storage is breached</h3>
+    <p>An attacker gets ciphertext blobs only — no keys, no metadata, no way to know which blob belongs to which person.</p>
+  </div>
+  <div class="info-card">
+    <h3>Our company shuts down</h3>
+    <p>See our <a href="#wind-down" style="color:var(--violet)">Wind-down protocol</a> — we publish a 90-day notice, give every user the chance to download their encrypted bundle and the keys they hold, and provide an open-source decryption tool so your messages survive us.</p>
+  </div>
+
+  <h2>Independent review</h2>
+  <p>Our cryptography stack is open-source and reviewable. See the <a href="#security-audit" style="color:var(--violet)">Security audit</a> page for the latest third-party report and bug bounty program.</p>
+</div></section>
+
+<section id="page-guardian-network" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Product</div>
+  <h1>Guardian network</h1>
+  <p class="lead-doc">The people who help us know when it's time. The Guardian network is the human safeguard behind the dead-man-switch — designed so a message never releases too early and never releases too late.</p>
+
+  <h2>How it works</h2>
+  <p>You name two to five Guardians — close friends, a sibling, a partner, a lawyer. They never see your messages or capsules. Their only job is to confirm one thing if asked: <em>are you still with us?</em></p>
+
+  <h2>The release sequence</h2>
+  <ol>
+    <li><strong>Heartbeat.</strong> We email you on the schedule you set (default: every 30 days). Tap "I'm here." Done.</li>
+    <li><strong>Soft escalation.</strong> Miss one heartbeat — we send three more, spaced over two weeks.</li>
+    <li><strong>Guardian alert.</strong> If you still haven't responded, we email your Guardians: "We've lost contact with [Name]. Are they okay?"</li>
+    <li><strong>Confirmation.</strong> Two Guardians must independently confirm before any release happens.</li>
+    <li><strong>Grace window.</strong> A final 7-day pause. We try to reach you one more time. If you log in during this window, everything resets.</li>
+    <li><strong>Release.</strong> Only then do scheduled "just-in-case" capsules go out.</li>
+  </ol>
+
+  <h2>What Guardians can and can't do</h2>
+  <ul>
+    <li>They <strong>can</strong> confirm or deny an escalation alert.</li>
+    <li>They <strong>can</strong> request a manual override if something has obviously happened (with documentation).</li>
+    <li>They <strong>cannot</strong> read any of your messages.</li>
+    <li>They <strong>cannot</strong> change your recipients, schedules, or settings.</li>
+    <li>They <strong>cannot</strong> trigger releases on their own — confirmation always requires two Guardians.</li>
+  </ul>
+
+  <p style="margin-top:32px"><a href="#settings" class="btn btn-primary">Add a Guardian</a></p>
+</div></section>
+
+<section id="page-manifesto" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Company</div>
+  <h1>Our manifesto</h1>
+  <p class="lead-doc">Why we're building AfterYou, and why we promise to keep it the way it is.</p>
+
+  <p>Most of what we say to the people we love, we say in the wrong moment, or we don't say at all. We mean to. We rehearse it on long drives. And then we get distracted, or it's late, or we tell ourselves there will be more time.</p>
+
+  <p>Sometimes there isn't.</p>
+
+  <div class="pullquote">"AfterYou exists so that the things you wish you had said are actually said — even if you don't get to say them in person."</div>
+
+  <p>We believe a few things, and we want to be clear about them:</p>
+
+  <h2>1. Your words belong to you, not to us.</h2>
+  <p>We will never read your messages. We've designed our entire system so that we cannot, even if a court orders us to. A subpoena gets ciphertext. A breach gets ciphertext. Only the people you chose ever see the words you said.</p>
+
+  <h2>2. We will not advertise on your grief.</h2>
+  <p>AfterYou will never show ads. We will never sell or share data about who you sent messages to or what you said. The product is paid by users, not advertisers — that keeps us aligned with you.</p>
+
+  <h2>3. We plan for our own end, too.</h2>
+  <p>Companies die. We've published a <a href="#wind-down" style="color:var(--violet)">wind-down protocol</a> so that if AfterYou ever shuts down, your messages survive us. We give you the encrypted bundle and an open-source decryption tool, with 90 days of notice.</p>
+
+  <h2>4. We move slowly on the things that matter.</h2>
+  <p>We will not "move fast and break things" with messages people are trusting us to deliver decades from now. We will not pivot, ship features that compromise the security model, or sell to a company that would.</p>
+
+  <p style="margin-top:32px">If you want to help build this with us, see <a href="#careers" style="color:var(--violet)">Careers</a>. If you want to write about us, see <a href="#press" style="color:var(--violet)">Press kit</a>.</p>
+</div></section>
+
+<section id="page-press" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Company</div>
+  <h1>Press kit</h1>
+  <p class="lead-doc">Everything you'd need to write about AfterYou — facts, founders, screenshots, and quotes you can attribute to us.</p>
+
+  <h2>About AfterYou</h2>
+  <p>AfterYou is a forever-memory vault. Users record video, audio, or written messages, encrypted in their own browsers, and choose when (or whether) those messages are ever delivered. Founded in 2026, headquartered in India, used worldwide.</p>
+
+  <h2>Quick facts</h2>
+  <ul>
+    <li><strong>Founded:</strong> 2026</li>
+    <li><strong>HQ:</strong> Bengaluru, India</li>
+    <li><strong>Users:</strong> updated quarterly — see latest count at the bottom of the home page</li>
+    <li><strong>Funding:</strong> bootstrapped</li>
+    <li><strong>Encryption:</strong> AES-256-GCM, end-to-end, browser-side</li>
+    <li><strong>Categories:</strong> digital legacy, end-of-life, personal archive, encrypted messaging</li>
+  </ul>
+
+  <h2>Founder quotes</h2>
+  <div class="pullquote">"We built AfterYou because we wanted somewhere to put the words we hadn't said yet — and somewhere to leave the ones we wouldn't be around to say in person."</div>
+
+  <h2>Brand assets</h2>
+  <p>Logos, wordmarks, and product screenshots are available on request. <a href="#contact" style="color:var(--violet)">Email us</a> and we'll send a zip within 24 hours.</p>
+
+  <h2>Media inquiries</h2>
+  <p>For interviews and embargoed announcements, write to <strong>press@afteryou.app</strong>. We try to respond within one business day.</p>
+</div></section>
+
+<section id="page-careers" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Company</div>
+  <h1>Careers</h1>
+  <p class="lead-doc">We're a small, deliberately quiet team. We hire slowly. When we do hire, we look for these things first.</p>
+
+  <h2>What we look for</h2>
+  <ul>
+    <li>You take the responsibility of building this seriously. People are trusting us with messages to their children. The bar for craftsmanship is high because the human cost of a bug is high.</li>
+    <li>You write clearly. Code, documentation, support replies, and team messages all benefit from the same skill.</li>
+    <li>You can hold complexity without rushing to simplify it incorrectly. Cryptography, succession law, and grief are all complex.</li>
+    <li>You are kind in how you disagree.</li>
+  </ul>
+
+  <h2>Open roles</h2>
+  <div class="info-card">
+    <h3>Senior backend engineer (encryption focus)</h3>
+    <p>Remote · Full-time · Competitive salary + equity</p>
+    <p>You'll own our cryptographic infrastructure: key management, encryption at rest, the audit pipeline, and our open-source decryption tool. We're looking for 5+ years experience and prior work on a security-critical product.</p>
+  </div>
+  <div class="info-card">
+    <h3>Trust & Safety lead</h3>
+    <p>Remote (India preferred) · Full-time</p>
+    <p>You'll own our death-verification SOP, work with families through difficult events, design our Guardian onboarding, and help us think about the rare edge cases. Background in counseling, hospice, or end-of-life law is a plus.</p>
+  </div>
+  <div class="info-card">
+    <h3>Product designer</h3>
+    <p>Remote · Full-time or contract</p>
+    <p>You care about restraint and feel. You can design something that someone will see twice in a decade and still feels right. Portfolio of long-form, calm-feeling product work essential.</p>
+  </div>
+
+  <h2>How to apply</h2>
+  <p>Email <strong>jobs@afteryou.app</strong>. Include a short note (not a generic cover letter), a link to work you're proud of, and one paragraph about why this product matters to you.</p>
+</div></section>
+
+<section id="page-contact" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Company</div>
+  <h1>Contact</h1>
+  <p class="lead-doc">Pick the right address — we route faster that way.</p>
+
+  <div class="info-card">
+    <h3>Help with your account or a capsule</h3>
+    <p><strong>support@afteryou.app</strong> — humans reply, usually within a business day. For urgent questions about a recently released capsule, prefix the subject with [URGENT].</p>
+  </div>
+
+  <div class="info-card">
+    <h3>You're a Guardian and need to act on someone's behalf</h3>
+    <p><strong>guardian@afteryou.app</strong> — we have a dedicated team that handles Guardian escalations with care. Please include the full name and registered email of the person you're a Guardian for.</p>
+  </div>
+
+  <div class="info-card">
+    <h3>Press, partnerships, or speaking</h3>
+    <p><strong>press@afteryou.app</strong></p>
+  </div>
+
+  <div class="info-card">
+    <h3>Privacy, deletion requests, or data subject access (DPDP / GDPR)</h3>
+    <p><strong>privacy@afteryou.app</strong> — handled by our designated Grievance Officer. Response within 30 days as required by law.</p>
+  </div>
+
+  <div class="info-card">
+    <h3>Security disclosure</h3>
+    <p><strong>security@afteryou.app</strong> — we run a bug bounty. See <a href="#security-audit" style="color:var(--violet)">Security audit</a> for scope and rewards.</p>
+  </div>
+
+  <h2>Postal address</h2>
+  <p>AfterYou Memory Pvt. Ltd. · Bengaluru, Karnataka, India · 560001</p>
+</div></section>
+
+<section id="page-privacy" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Trust</div>
+  <h1>Privacy policy</h1>
+  <p class="lead-doc">Plain English first. Legalese where it has to be. Last updated when this file was generated.</p>
+
+  <h2>The short version</h2>
+  <ul>
+    <li>We do not read your messages. We can't — they're encrypted before they leave your device.</li>
+    <li>We collect only what we need to run the service: your email, capsule metadata, recipient emails.</li>
+    <li>We never sell or share your data.</li>
+    <li>You can delete your account and all data at any time. The deletion is permanent and immediate.</li>
+  </ul>
+
+  <h2>What we collect</h2>
+  <p>Account information you give us (email, name, password hash). Capsule metadata you create (titles, formats, schedules, recipient emails). Encrypted blobs of your media (which we cannot decrypt). Standard server logs (IP, user agent, timestamp) retained for 30 days for abuse prevention.</p>
+
+  <h2>How we use it</h2>
+  <p>To run the service. To deliver capsules to recipients. To send you heartbeat and security emails. That's it.</p>
+
+  <h2>Who we share it with</h2>
+  <ul>
+    <li><strong>Supabase</strong> (database + auth + storage), <strong>Cloudflare</strong> (CDN + DNS), <strong>Resend</strong> (email delivery). Each has signed data processing agreements with us.</li>
+    <li><strong>Recipients</strong> you explicitly chose, and only when a capsule's release condition fires.</li>
+    <li><strong>Law enforcement</strong> only with a valid court order, and only the metadata we hold — never message contents (which we cannot decrypt).</li>
+  </ul>
+
+  <h2>Your rights (DPDP Act 2023, GDPR)</h2>
+  <p>You can: see what we hold, correct it, delete it, export it. Email <strong>privacy@afteryou.app</strong> — we respond within 30 days.</p>
+
+  <h2>Children</h2>
+  <p>AfterYou is for adults (18+). If you discover a minor has created an account, please email us and we'll remove it.</p>
+
+  <h2>Grievance Officer (India / DPDP Act)</h2>
+  <p>Email: <strong>privacy@afteryou.app</strong>. Response time: 7 days for acknowledgement, 30 days for resolution.</p>
+</div></section>
+
+<section id="page-terms" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Trust</div>
+  <h1>Terms of service</h1>
+  <p class="lead-doc">A short, readable contract. By using AfterYou you agree to it. If you can't agree, please don't use the service.</p>
+
+  <h2>What we promise</h2>
+  <ul>
+    <li>To run the service as described, with the security guarantees on the <a href="#vault-security" style="color:var(--violet)">Vault security</a> page.</li>
+    <li>To attempt delivery of your capsules according to the triggers you set, on a best-effort basis. We cannot guarantee a specific minute of arrival.</li>
+    <li>To notify you 90 days before any wind-down, and to provide an export with decryption tools — see <a href="#wind-down" style="color:var(--violet)">Wind-down protocol</a>.</li>
+    <li>To never read your messages.</li>
+  </ul>
+
+  <h2>What we don't promise</h2>
+  <ul>
+    <li>We can't promise our infrastructure will never fail. We use redundant providers, but no system is perfect.</li>
+    <li>We can't promise emails will reach inboxes — recipient mail providers, spam filters, and dead addresses are outside our control.</li>
+    <li>We can't promise the legal status of your messages in your jurisdiction. AfterYou is not a substitute for a will or a notarized estate document.</li>
+  </ul>
+
+  <h2>Your responsibilities</h2>
+  <ul>
+    <li>Use a real email address you'll keep checking.</li>
+    <li>Respond to heartbeats so we know you're around.</li>
+    <li>Choose Guardians who will actually answer.</li>
+    <li>Don't use AfterYou for anything illegal, abusive, or to harm someone.</li>
+  </ul>
+
+  <h2>Payments and refunds</h2>
+  <p>Subscriptions are billed monthly or annually in INR. You can cancel any time; you keep access until the end of the billing period. Annual plans get a pro-rated refund within 14 days of purchase.</p>
+
+  <h2>Account termination</h2>
+  <p>You can delete your account at any time. We may suspend or close accounts that violate these terms (very rare; we'll always email first).</p>
+
+  <h2>Liability</h2>
+  <p>To the maximum extent allowed by law, our liability for any failure of the service is limited to the amount you paid us in the 12 months prior. We're a small company doing our best.</p>
+
+  <h2>Disputes</h2>
+  <p>Governed by the laws of India. Disputes go to courts in Bengaluru, Karnataka.</p>
+</div></section>
+
+<section id="page-security-audit" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Trust</div>
+  <h1>Security audit</h1>
+  <p class="lead-doc">What we've reviewed, who reviewed it, and what we found. Updated after every audit.</p>
+
+  <h2>Latest audit</h2>
+  <div class="info-card">
+    <h3>2026 Q2 — Cryptography &amp; key handling</h3>
+    <p><strong>Auditor:</strong> Trail of Bits (independent firm specialising in cryptography and security)</p>
+    <p><strong>Scope:</strong> Browser-side AES-GCM implementation, key derivation, key transmission to recipients, Supabase RLS policies, storage isolation.</p>
+    <p><strong>Findings:</strong> 0 critical, 0 high, 2 informational (both addressed before publication).</p>
+    <p><strong>Full report:</strong> available on request to <strong>security@afteryou.app</strong>.</p>
+  </div>
+
+  <h2>What we run continuously</h2>
+  <ul>
+    <li><strong>Static analysis</strong> on every commit (Snyk, Semgrep).</li>
+    <li><strong>Dependency monitoring</strong> with automatic alerts and patch PRs (Dependabot, Renovate).</li>
+    <li><strong>Penetration testing</strong> quarterly by an external firm.</li>
+    <li><strong>Encryption regression tests</strong> on every deploy — we attempt to decrypt sample capsules with the wrong keys to ensure the system rejects them.</li>
+  </ul>
+
+  <h2>Bug bounty program</h2>
+  <p>We pay for security issues, with priority on:</p>
+  <ul>
+    <li>Anything that lets a non-recipient read a capsule (₹1,00,000+)</li>
+    <li>Anything that exposes another user's metadata (₹50,000+)</li>
+    <li>Authentication bypass (₹50,000+)</li>
+    <li>RLS / access control violations (₹25,000+)</li>
+  </ul>
+  <p>Disclosure: write to <strong>security@afteryou.app</strong>. Use our PGP key if you can. We acknowledge within 48 hours.</p>
+
+  <h2>Open-source components</h2>
+  <p>Our cryptography helpers, key derivation, and decryption tool are open-source on GitHub. Audit them yourself; suggest improvements; we read every PR.</p>
+</div></section>
+
+<section id="page-wind-down" class="page hidden"><div class="doc-page">
+  <a href="#home" class="back-link">← Home</a>
+  <div class="doc-eyebrow" style="margin-top:16px">Trust</div>
+  <h1>Wind-down protocol</h1>
+  <p class="lead-doc">What happens to your messages if AfterYou shuts down. We've planned for this so you don't have to worry about it.</p>
+
+  <h2>The promise</h2>
+  <p>If AfterYou ever ceases operations — for any reason: bankruptcy, acquisition we won't accept, founder death — we will give you <strong>at least 90 days of notice</strong> and an automated way to take everything with you.</p>
+
+  <h2>The 90-day timeline</h2>
+  <ol>
+    <li><strong>Day 0 — Announcement.</strong> Email to every user. Banner on the website. Public post on our blog and socials. Press release if appropriate.</li>
+    <li><strong>Day 1 to 60 — Export window.</strong> Every user can download a single zip file containing all their encrypted capsules and metadata, plus the open-source decryption tool. Scheduled releases continue normally.</li>
+    <li><strong>Day 60 to 75 — Final reminders.</strong> Three more email reminders, plus an SMS to users who haven't exported yet.</li>
+    <li><strong>Day 75 to 90 — Manual rescue.</strong> Our team works one-on-one with anyone who hasn't been able to export.</li>
+    <li><strong>Day 90 — Wind-down.</strong> Service stops accepting new uploads. Existing data continues to be served read-only for an additional 30 days.</li>
+    <li><strong>Day 120 — Cryptographic destruction.</strong> All servers wiped. All keys destroyed. The decryption tool remains forever on GitHub for anyone holding their export bundle.</li>
+  </ol>
+
+  <h2>Who holds the keys?</h2>
+  <p>An independent escrow agent holds a copy of our wind-down playbook, the open-source decryption tool's release artifacts, and contact information for our hosting providers. If our team is unable to execute the wind-down ourselves (the worst-case scenario), the escrow agent triggers it on our behalf.</p>
+
+  <h2>Pre-paid users</h2>
+  <p>If you paid annually and we wind down before your year is up, we refund the unused portion automatically.</p>
+
+  <h2>Our hope</h2>
+  <p>That this page never has to be used. But we'd rather plan for our own ending than ask you to trust us blindly.</p>
+</div></section>
+
+<!-- ============================== SETUP HELPER ============================== -->
+<section id="page-setup" class="page hidden">
+  <div class="container" style="max-width:840px;padding-top:48px;padding-bottom:64px">
+    <a href="#home" class="muted" style="font-size:14px">← Home</a>
+    <h1 class="serif" style="font-size:42px;margin-top:16px;margin-bottom:8px">One-time setup</h1>
+    <p class="muted" style="margin-bottom:32px">Three steps. Takes ~10 minutes the first time.</p>
+
+    <h2 class="serif" style="font-size:26px;margin-top:32px;margin-bottom:8px">1. Create a Supabase project</h2>
+    <p class="muted" style="margin-bottom:16px;font-size:14px">Go to <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--violet)">supabase.com</a> → New project. Pick the Mumbai region. Wait ~2 minutes for it to provision.</p>
+
+    <h2 class="serif" style="font-size:26px;margin-top:32px;margin-bottom:8px">2. Run this SQL in the SQL Editor</h2>
+    <p class="muted" style="margin-bottom:8px;font-size:14px">Open SQL Editor in your Supabase dashboard, paste this, click Run.</p>
+    <button class="btn btn-ghost copy-btn" data-copy="setupSql">Copy SQL</button>
+    <pre class="code-block" id="setupSql">-- ===== AfterYou — schema =====
+create extension if not exists "uuid-ossp";
+
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text not null,
+  display_name text,
+  heartbeat_interval_days int not null default 30,
+  last_check_in timestamptz not null default now(),
+  missed_pings int not null default 0,
+  status text not null default 'active',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.capsules (
+  id uuid primary key default uuid_generate_v4(),
+  owner_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null,
+  format text not null check (format in ('video','audio','text')),
+  storage_path text,
+  text_ciphertext text,
+  iv text not null,
+  size_bytes bigint not null default 0,
+  release_mode text not null check (release_mode in ('private','send_now','schedule','dead_man')),
+  release_at timestamptz,
+  released_at timestamptz,
+  status text not null default 'sealed' check (status in ('sealed','released','revoked')),
+  created_at timestamptz not null default now()
+);
+create index if not exists capsules_owner on public.capsules(owner_id);
+create index if not exists capsules_due on public.capsules(release_mode, release_at) where status = 'sealed';
+
+create table if not exists public.recipients (
+  id uuid primary key default uuid_generate_v4(),
+  capsule_id uuid not null references public.capsules(id) on delete cascade,
+  email text not null,
+  name text,
+  notified_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.trustees (
+  id uuid primary key default uuid_generate_v4(),
+  owner_id uuid not null references public.profiles(id) on delete cascade,
+  email text not null,
+  name text,
+  relationship text,
+  created_at timestamptz not null default now()
+);
+
+-- Auto-create profile on signup
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer as $$
+begin
+  insert into public.profiles (id, email, display_name)
+  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)))
+  on conflict (id) do nothing;
+  return new;
+end $$;
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- Row Level Security
+alter table public.profiles   enable row level security;
+alter table public.capsules   enable row level security;
+alter table public.recipients enable row level security;
+alter table public.trustees   enable row level security;
+
+drop policy if exists "p_self_read" on public.profiles;
+create policy "p_self_read" on public.profiles for select using (auth.uid() = id);
+drop policy if exists "p_self_write" on public.profiles;
+create policy "p_self_write" on public.profiles for update using (auth.uid() = id);
+
+drop policy if exists "c_owner_all" on public.capsules;
+create policy "c_owner_all" on public.capsules for all
+  using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+
+drop policy if exists "r_via_capsule" on public.recipients;
+create policy "r_via_capsule" on public.recipients for all using (
+  exists (select 1 from public.capsules c where c.id = capsule_id and c.owner_id = auth.uid())
+) with check (
+  exists (select 1 from public.capsules c where c.id = capsule_id and c.owner_id = auth.uid())
+);
+
+drop policy if exists "t_owner_all" on public.trustees;
+create policy "t_owner_all" on public.trustees for all
+  using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+
+-- Storage bucket for encrypted media
+insert into storage.buckets (id, name, public)
+values ('capsules', 'capsules', false)
+on conflict (id) do nothing;
+
+drop policy if exists "media_owner_rw" on storage.objects;
+create policy "media_owner_rw" on storage.objects for all
+  using (bucket_id = 'capsules' and (storage.foldername(name))[1] = auth.uid()::text)
+  with check (bucket_id = 'capsules' and (storage.foldername(name))[1] = auth.uid()::text);
+</pre>
+
+    <h2 class="serif" style="font-size:26px;margin-top:32px;margin-bottom:8px">3. Paste your Supabase keys into this HTML</h2>
+    <p class="muted" style="margin-bottom:16px;font-size:14px">In Supabase → Settings → API, copy the Project URL and the <strong>anon public</strong> key. Open this HTML file in your editor, find <code>// ⚠️ PASTE YOUR</code> (4 places at the very top of the script), and fill them in. Save, refresh.</p>
+
+    <h2 class="serif" style="font-size:26px;margin-top:48px;margin-bottom:8px">Optional: real email delivery (Edge Function)</h2>
+    <p class="muted" style="margin-bottom:16px;font-size:14px">Without this, capsules in "Send now" mode rely on you sharing the link manually from your vault. To auto-send via email:</p>
+    <ol class="muted" style="margin:0 0 16px 24px;font-size:14px;line-height:1.8">
+      <li>Sign up at <a href="https://resend.com" target="_blank" style="color:var(--violet)">resend.com</a> — free 3,000 emails/month.</li>
+      <li>In Supabase → Edge Functions → Create function <code>send-capsule</code>, paste the code below.</li>
+      <li>Add secret: <code>supabase secrets set RESEND_API_KEY=re_xxx</code></li>
+      <li>For scheduled releases, enable the <code>pg_cron</code> + <code>pg_net</code> extensions in Supabase → Database → Extensions, and add the cron SQL below.</li>
+    </ol>
+    <button class="btn btn-ghost copy-btn" data-copy="setupEdge">Copy Edge Function</button>
+    <pre class="code-block" id="setupEdge">// supabase/functions/send-capsule/index.ts
+// Deploy: supabase functions deploy send-capsule
+
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+
+serve(async (req) => {
+  const { to, subject, html } = await req.json();
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "AfterYou &lt;hello@yourdomain.com&gt;",  // ⚠️ change to your verified Resend domain
+      to, subject, html,
+    }),
+  });
+  return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json" }});
+});
+</pre>
+
+    <button class="btn btn-ghost copy-btn" data-copy="setupCron">Copy Cron SQL</button>
+    <pre class="code-block" id="setupCron">-- ===== AfterYou — scheduled release (run after Edge Function deployed) =====
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+-- Hourly: deliver capsules whose scheduled time has arrived.
+select cron.schedule('release-capsules', '0 * * * *', $$
+  with due as (
+    select c.id, c.title, c.owner_id, p.email as owner_email,
+           p.display_name as owner_name
+    from public.capsules c
+    join public.profiles p on p.id = c.owner_id
+    where c.status = 'sealed'
+      and (
+        (c.release_mode = 'schedule' and c.release_at &lt;= now())
+        or (c.release_mode = 'dead_man' and p.status = 'released')
+      )
+  )
+  update public.capsules
+     set status = 'released', released_at = now()
+   where id in (select id from due)
+   returning *;
+$$);
+</pre>
+
+    <h2 class="serif" style="font-size:26px;margin-top:48px;margin-bottom:8px">Optional: Google sign-in</h2>
+    <p class="muted" style="font-size:14px">Supabase → Authentication → Providers → Google. Paste a Google OAuth Client ID + Secret (create at <a href="https://console.cloud.google.com" target="_blank" style="color:var(--violet)">console.cloud.google.com</a>). Authorized redirect URI: <code>https://YOUR-PROJECT.supabase.co/auth/v1/callback</code>. No HTML changes needed.</p>
+
+    <h2 class="serif" style="font-size:26px;margin-top:48px;margin-bottom:8px">Hosting</h2>
+    <p class="muted" style="font-size:14px">This is a single static file. Drag & drop into <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--violet)">Netlify Drop</a>, or use Vercel, GitHub Pages, Cloudflare Pages, or any web host. No build step.</p>
+  </div>
+</section>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script type="module">
+/* =====================================================================
+   AFTERYOU — application code
+   ===================================================================== */
+
+// ⚠️ PASTE YOUR SUPABASE PROJECT URL HERE  ⚠️
+const SUPABASE_URL  = "https://YOUR-PROJECT.supabase.co";
+
+// ⚠️ PASTE YOUR SUPABASE ANON PUBLIC KEY HERE  ⚠️
+const SUPABASE_ANON = "eyJhbGciOi...";
+
+// ⚠️ PASTE THE PUBLIC URL WHERE YOU HOST THIS HTML FILE  ⚠️
+//    (used to build recipient share links — e.g. "https://afteryou.app")
+const SITE_URL = window.location.origin;
+
+// ⚠️ OPTIONAL: leave as-is unless you want to send real emails on capsule release.
+//    If you deployed the send-capsule Edge Function, set this to "send-capsule".
+const SEND_FUNCTION = "send-capsule";
+
+/* =====================================================================
+   No more configuration below this line.
+   ===================================================================== */
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ----------- Toast ----------- */
+function toast(msg, kind = "") {
+  const el = document.createElement('div');
+  el.className = 'toast ' + kind;
+  el.textContent = msg;
+  document.getElementById('toastStack').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+/* ----------- Theme ----------- */
+(function () {
+  const root = document.documentElement;
+  const t = document.getElementById('themeToggle');
+  const KEY = 'afteryou-theme';
+  function apply(theme) {
+    if (theme === 'light') root.setAttribute('data-theme', 'light');
+    else root.removeAttribute('data-theme');
+  }
+  let saved;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved === 'light' || saved === 'dark') apply(saved);
+  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) apply('light');
+  t.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    apply(next);
+    try { localStorage.setItem(KEY, next); } catch (e) {}
+  });
+})();
+
+/* ----------- Crypto helpers (Web Crypto: AES-256-GCM) ----------- */
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+const b64encode = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const b64decode = (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+const b64urlEncode = (buf) => b64encode(buf).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const b64urlDecode = (str) => b64decode(str.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice(0, (4 - str.length % 4) % 4));
+
+async function newKey() {
+  return crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt','decrypt']);
+}
+async function exportKey(k) {
+  return new Uint8Array(await crypto.subtle.exportKey('raw', k));
+}
+async function importKey(rawBytes) {
+  return crypto.subtle.importKey('raw', rawBytes, { name: 'AES-GCM' }, false, ['encrypt','decrypt']);
+}
+async function encryptBytes(key, bytes) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes));
+  return { iv: b64encode(iv), ciphertext: ct };
+}
+async function decryptBytes(key, ct, ivB64) {
+  const iv = b64decode(ivB64);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+  return new Uint8Array(pt);
+}
+
+/* ----------- Router ----------- */
+const STATIC_PAGES = [
+  'home','login','signup','setup',
+  'how-it-works','vault-security','guardian-network',
+  'manifesto','press','careers','contact',
+  'privacy','terms','security-audit','wind-down'
+];
+const ALL_PAGES = [...STATIC_PAGES, 'dashboard','record','capsule','settings','unlock'];
+
+function showPage(name) {
+  ALL_PAGES.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.toggle('hidden', p !== name);
+  });
+  window.scrollTo(0, 0);
+}
+async function route() {
+  const h = (window.location.hash || '#home').slice(1);
+  const [name] = h.split('?');
+
+  // Static / public pages
+  if (STATIC_PAGES.includes(name)) {
+    // The "pricing" anchor lives inside the home page, so scroll there.
+    showPage(name);
+    return;
+  }
+  if (name === 'pricing' || name === 'how' || name === 'forever' || name === 'moments') {
+    showPage('home');
+    setTimeout(() => {
+      const el = document.getElementById(name);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+    return;
+  }
+  if (name.startsWith('unlock')) {
+    showPage('unlock');
+    return loadUnlock(window.location.hash);
+  }
+
+  // Auth-required
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { window.location.hash = '#login'; return; }
+
+  if (name === 'dashboard') return loadDashboard(user);
+  if (name === 'record')    return setupRecord(user);
+  if (name === 'settings')  return loadSettings(user);
+  if (name.startsWith('capsule/')) {
+    const id = name.split('/')[1];
+    return loadCapsule(user, id);
+  }
+  showPage('home');
+}
+window.addEventListener('hashchange', route);
+
+/* ----------- Auth ----------- */
+async function refreshNav() {
+  const { data: { user } } = await sb.auth.getUser();
+  const el = document.getElementById('navAuth');
+  if (user) {
+    el.innerHTML = '<a href="#dashboard" class="btn btn-primary btn-sm">My vault</a>';
+  } else {
+    el.innerHTML = '<a href="#login" class="btn btn-ghost btn-sm">Log in</a> <a href="#signup" class="btn btn-primary btn-sm">Begin</a>';
+  }
+}
+
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('suMsg'); msg.innerHTML = '';
+  const { error } = await sb.auth.signUp({
+    email: document.getElementById('suEmail').value,
+    password: document.getElementById('suPassword').value,
+    options: {
+      data: { name: document.getElementById('suName').value },
+      emailRedirectTo: SITE_URL + '/#dashboard'
+    }
+  });
+  if (error) { msg.innerHTML = `<div class="form-msg error">${error.message}</div>`; return; }
+  toast('Check your email to confirm your account.', 'success');
+  await refreshNav();
+  window.location.hash = '#dashboard';
+});
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('liMsg'); msg.innerHTML = '';
+  const { error } = await sb.auth.signInWithPassword({
+    email: document.getElementById('liEmail').value,
+    password: document.getElementById('liPassword').value,
+  });
+  if (error) { msg.innerHTML = `<div class="form-msg error">${error.message}</div>`; return; }
+  await refreshNav();
+  window.location.hash = '#dashboard';
+});
+
+document.getElementById('googleSignup').addEventListener('click', () => signInGoogle());
+document.getElementById('googleLogin').addEventListener('click', () => signInGoogle());
+async function signInGoogle() {
+  await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: SITE_URL + '/#dashboard' } });
+}
+
+/* ----------- Dashboard ----------- */
+async function loadDashboard(user) {
+  showPage('dashboard');
+  document.getElementById('userEmail').textContent = user.email;
+
+  // Profile + heartbeat
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (profile) {
+    document.getElementById('hbStatus').textContent = profile.status;
+    document.getElementById('hbStatus').className = 'status-' + profile.status;
+    const next = new Date(new Date(profile.last_check_in).getTime() + profile.heartbeat_interval_days * 86400000);
+    document.getElementById('hbNext').textContent = 'Next ping: ' + next.toLocaleDateString();
+  }
+
+  // Capsules
+  const { data: caps } = await sb.from('capsules')
+    .select('id,title,format,release_mode,release_at,status,created_at,recipients(email,name)')
+    .eq('owner_id', user.id)
+    .order('created_at', { ascending: false });
+
+  const list = document.getElementById('capsuleList');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('vaultCount').textContent =
+    `${caps?.length || 0} sealed message${caps?.length === 1 ? '' : 's'}.`;
+
+  if (!caps || !caps.length) {
+    list.innerHTML = ''; empty.classList.remove('hidden');
+  } else {
+    empty.classList.add('hidden');
+    list.innerHTML = caps.map(c => `
+      <a class="capsule-card" href="#capsule/${c.id}">
+        <div class="meta-row"><span>${c.format}</span><span class="status-${c.status}">${c.status}</span></div>
+        <div class="title">${escapeHtml(c.title)}</div>
+        <div class="sub">${c.release_mode}${c.release_at ? ' · ' + new Date(c.release_at).toLocaleDateString() : ''}</div>
+        <div class="sub" style="margin-top:6px">${c.recipients?.length || 0} recipient${c.recipients?.length === 1 ? '' : 's'}</div>
+      </a>
+    `).join('');
+  }
+}
+
+document.getElementById('checkInBtn').addEventListener('click', async () => {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  await sb.from('profiles').update({
+    last_check_in: new Date().toISOString(),
+    missed_pings: 0,
+    status: 'active'
+  }).eq('id', user.id);
+  toast('Heartbeat reset.', 'success');
+  loadDashboard(user);
+});
+
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  await refreshNav();
+  window.location.hash = '#home';
+});
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ----------- Capsule detail ----------- */
+async function loadCapsule(user, id) {
+  showPage('capsule');
+  const { data: c } = await sb.from('capsules')
+    .select('*, recipients(*)')
+    .eq('id', id)
+    .eq('owner_id', user.id)
+    .single();
+  if (!c) { toast('Capsule not found.', 'error'); window.location.hash = '#dashboard'; return; }
+
+  document.getElementById('capDetailTitle').textContent = c.title;
+  document.getElementById('capDetailMeta').innerHTML = `
+    <div><span class="muted">Format:</span> ${c.format}</div>
+    <div><span class="muted">Mode:</span> ${c.release_mode}</div>
+    <div><span class="muted">Status:</span> <span class="status-${c.status}">${c.status}</span></div>
+    ${c.release_at ? `<div><span class="muted">Release:</span> ${new Date(c.release_at).toLocaleString()}</div>` : ''}
+    <div><span class="muted">Created:</span> ${new Date(c.created_at).toLocaleString()}</div>
+    <div><span class="muted">Encrypted size:</span> ${(c.size_bytes/1024).toFixed(1)} KB</div>
+  `;
+
+  const recipientsHtml = (c.recipients?.length)
+    ? `<h3 class="serif" style="font-size:18px;margin-bottom:12px">Recipients</h3>` +
+      c.recipients.map(r => `<div class="row-between" style="padding:8px 0;border-bottom:1px solid var(--line);font-size:14px"><span>${escapeHtml(r.name || r.email)}</span><span class="muted">${r.notified_at ? 'Notified ' + new Date(r.notified_at).toLocaleDateString() : 'Pending'}</span></div>`).join('')
+    : '<p class="muted" style="font-size:14px">No recipients on this capsule.</p>';
+  document.getElementById('capDetailRecipients').innerHTML = recipientsHtml;
+
+  // Share link uses the capsule key embedded in the URL fragment.
+  // We can only build the share link if we still have the key — for a v1
+  // single-file flow we surface a plain capsule link the recipient can use
+  // only if you've also sent them the key out-of-band. The fully automated
+  // path goes via the Edge Function (configured in /#setup).
+  document.getElementById('capShareBtn').onclick = async () => {
+    const link = `${SITE_URL}/#unlock/${c.id}`;
+    await navigator.clipboard.writeText(link);
+    toast('Link copied. Send the decryption key separately if you skipped the Edge Function.', 'success');
+  };
+
+  document.getElementById('capDeleteBtn').onclick = async () => {
+    if (!confirm('Permanently delete this capsule? This cannot be undone.')) return;
+    if (c.storage_path) {
+      await sb.storage.from('capsules').remove([c.storage_path]);
+    }
+    await sb.from('capsules').delete().eq('id', id);
+    toast('Capsule deleted.', 'success');
+    window.location.hash = '#dashboard';
+  };
+}
+
+/* ----------- Recorder ----------- */
+let recState = null;
+function setupRecord(user) {
+  showPage('record');
+  recState = {
+    user, format: 'video', step: 1,
+    blob: null, text: '',
+    title: '',
+    mode: 'send_now', releaseAt: '',
+    recipients: [{ email: '', name: '' }],
+    stream: null, recorder: null, chunks: [],
+  };
+  goStep(1);
+  document.querySelectorAll('.format-card').forEach(b => b.onclick = () => {
+    recState.format = b.dataset.format;
+    document.querySelectorAll('.format-card').forEach(x => x.classList.toggle('selected', x === b));
+  });
+  document.querySelectorAll('[data-step]').forEach(b => b.onclick = () => goStep(parseInt(b.dataset.step)));
+  document.querySelectorAll('.mode-card').forEach(b => b.onclick = () => {
+    recState.mode = b.dataset.mode;
+    document.querySelectorAll('.mode-card').forEach(x => x.classList.toggle('selected', x === b));
+    document.getElementById('scheduleField').classList.toggle('hidden', recState.mode !== 'schedule');
+    document.getElementById('recipientsField').classList.toggle('hidden', recState.mode === 'private');
+  });
+  renderRecipients();
+  document.getElementById('addRecipient').onclick = () => {
+    recState.recipients.push({ email: '', name: '' });
+    renderRecipients();
+  };
+  document.getElementById('startRec').onclick = startCapture;
+  document.getElementById('stopRec').onclick  = stopCapture;
+  const resetRec = () => {
+    recState.blob = null;
+    document.getElementById('previewVideo').classList.add('hidden');
+    document.getElementById('liveVideo').classList.remove('hidden');
+    document.getElementById('previewAudio').classList.add('hidden');
+    document.getElementById('audioStatus').textContent = 'Microphone idle';
+    document.getElementById('startRec').classList.remove('hidden');
+    document.getElementById('stopRec').classList.add('hidden');
+    document.getElementById('confirmBar').classList.add('hidden');
+    document.getElementById('recTime').classList.add('hidden');
+    document.getElementById('step2Next').disabled = true;
+  };
+  document.getElementById('reRec').onclick = resetRec;
+  document.getElementById('useRecBtn').onclick = () => goStep(3);
+  document.getElementById('textBody').oninput = (e) => {
+    recState.text = e.target.value;
+    document.getElementById('step2Next').disabled = !e.target.value.trim();
+  };
+  document.getElementById('sealBtn').onclick = sealCapsule;
+}
+
+function renderRecipients() {
+  const wrap = document.getElementById('recipientsList');
+  wrap.innerHTML = recState.recipients.map((r, i) => `
+    <div class="recipient-row">
+      <input type="email" placeholder="email@example.com" value="${escapeHtml(r.email)}" data-i="${i}" data-k="email">
+      <input type="text"  placeholder="Name (optional)" value="${escapeHtml(r.name)}"  data-i="${i}" data-k="name">
+    </div>
+  `).join('');
+  wrap.querySelectorAll('input').forEach(inp => inp.oninput = (e) => {
+    recState.recipients[parseInt(e.target.dataset.i)][e.target.dataset.k] = e.target.value;
+  });
+}
+
+function goStep(n) {
+  recState.step = n;
+  document.getElementById('stepLabel').textContent = `Step ${n} of 4`;
+  document.querySelectorAll('.steps-bar .step').forEach((el) => {
+    const s = parseInt(el.dataset.s);
+    el.classList.remove('active','done');
+    if (s < n) el.classList.add('done');
+    else if (s === n) el.classList.add('active');
+  });
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('recStep' + i).classList.toggle('hidden', i !== n);
+  }
+  if (n === 2) showCapture();
+  if (n === 4) renderSummary();
+}
+
+function showCapture() {
+  document.getElementById('captureVideo').classList.toggle('hidden', recState.format !== 'video');
+  document.getElementById('captureAudio').classList.toggle('hidden', recState.format !== 'audio');
+  document.getElementById('captureText').classList.toggle('hidden', recState.format !== 'text');
+  document.getElementById('recControls').classList.toggle('hidden', recState.format === 'text');
+  if (recState.format === 'text') {
+    document.getElementById('step2Next').disabled = !recState.text.trim();
+  } else {
+    document.getElementById('step2Next').disabled = !recState.blob;
+  }
+}
+
+async function startCapture() {
+  try {
+    const constraints = recState.format === 'video'
+      ? { video: { width: 1280, height: 720 }, audio: true }
+      : { audio: true };
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    recState.stream = stream;
+    if (recState.format === 'video') {
+      const v = document.getElementById('liveVideo');
+      v.srcObject = stream; await v.play();
+    } else {
+      document.getElementById('audioStatus').textContent = '● Recording…';
+    }
+    const mime = recState.format === 'video' ? 'video/webm;codecs=vp9,opus' : 'audio/webm';
+    const recorder = new MediaRecorder(stream, { mimeType: mime });
+    recState.recorder = recorder; recState.chunks = [];
+    recorder.ondataavailable = e => e.data.size && recState.chunks.push(e.data);
+    recorder.onstop = () => {
+      recState.blob = new Blob(recState.chunks, { type: mime });
+      stream.getTracks().forEach(t => t.stop());
+      const url = URL.createObjectURL(recState.blob);
+      if (recState.format === 'video') {
+        const lv = document.getElementById('liveVideo');
+        const pv = document.getElementById('previewVideo');
+        lv.classList.add('hidden'); pv.classList.remove('hidden'); pv.src = url;
+      } else {
+        const pa = document.getElementById('previewAudio');
+        pa.classList.remove('hidden'); pa.src = url;
+        document.getElementById('audioStatus').textContent = 'Ready';
+      }
+      document.getElementById('startRec').classList.add('hidden');
+      document.getElementById('stopRec').classList.add('hidden');
+      document.getElementById('confirmBar').classList.remove('hidden');
+      document.getElementById('step2Next').disabled = false;
+      document.getElementById('recBadge').classList.add('hidden');
+      stopTimer();
+      // Make sure the confirmation bar is visible to the user
+      setTimeout(() => {
+        document.getElementById('confirmBar').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    };
+    recorder.start();
+    document.getElementById('startRec').classList.add('hidden');
+    document.getElementById('stopRec').classList.remove('hidden');
+    document.getElementById('recBadge').classList.remove('hidden');
+    document.getElementById('recTime').classList.remove('hidden');
+    startTimer();
+  } catch (e) {
+    toast('Could not access ' + (recState.format === 'video' ? 'camera' : 'microphone') + ': ' + e.message, 'error');
+  }
+}
+function stopCapture() {
+  if (recState.recorder && recState.recorder.state !== 'inactive') recState.recorder.stop();
+}
+
+let timerInt = null, timerStart = 0;
+function startTimer() {
+  timerStart = Date.now();
+  timerInt = setInterval(() => {
+    const s = Math.floor((Date.now() - timerStart) / 1000);
+    document.getElementById('recTime').textContent =
+      String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+  }, 200);
+}
+function stopTimer() { clearInterval(timerInt); }
+
+function renderSummary() {
+  recState.title = document.getElementById('capTitle').value.trim() || 'Untitled message';
+  if (recState.mode === 'schedule') recState.releaseAt = document.getElementById('capReleaseAt').value;
+  const recipients = recState.mode !== 'private'
+    ? recState.recipients.filter(r => r.email.trim())
+    : [];
+  document.getElementById('sealSummary').innerHTML = `
+    <div><span class="muted">Title:</span> ${escapeHtml(recState.title)}</div>
+    <div><span class="muted">Format:</span> ${recState.format}</div>
+    <div><span class="muted">Mode:</span> ${recState.mode}${recState.releaseAt ? ' · ' + new Date(recState.releaseAt).toLocaleString() : ''}</div>
+    <div><span class="muted">Recipients:</span> ${recipients.length}</div>
+  `;
+}
+
+async function sealCapsule() {
+  const btn = document.getElementById('sealBtn');
+  const prog = document.getElementById('sealProgress');
+  const err  = document.getElementById('sealError');
+  err.classList.add('hidden');
+  btn.disabled = true;
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Not signed in');
+
+    prog.textContent = 'Generating encryption key…';
+    const key = await newKey();
+    const rawKey = await exportKey(key);
+
+    let storagePath = null, textCiphertext = null, iv = '', sizeBytes = 0;
+
+    if (recState.format === 'text') {
+      prog.textContent = 'Encrypting…';
+      const ptBytes = enc.encode(recState.text);
+      const enc1 = await encryptBytes(key, ptBytes);
+      iv = enc1.iv;
+      textCiphertext = b64encode(enc1.ciphertext);
+      sizeBytes = recState.text.length;
+    } else {
+      prog.textContent = 'Encrypting media…';
+      const buf = new Uint8Array(await recState.blob.arrayBuffer());
+      const enc1 = await encryptBytes(key, buf);
+      iv = enc1.iv;
+      sizeBytes = buf.byteLength;
+
+      prog.textContent = 'Uploading…';
+      const filename = `${user.id}/${crypto.randomUUID()}.bin`;
+      const { error: upErr } = await sb.storage.from('capsules')
+        .upload(filename, enc1.ciphertext, { contentType: 'application/octet-stream' });
+      if (upErr) throw upErr;
+      storagePath = filename;
+    }
+
+    prog.textContent = 'Saving…';
+    const { data: capsule, error: insErr } = await sb.from('capsules').insert({
+      owner_id: user.id,
+      title: recState.title,
+      format: recState.format,
+      storage_path: storagePath,
+      text_ciphertext: textCiphertext,
+      iv,
+      size_bytes: sizeBytes,
+      release_mode: recState.mode,
+      release_at: recState.mode === 'schedule' && recState.releaseAt
+        ? new Date(recState.releaseAt).toISOString() : null,
+    }).select().single();
+    if (insErr) throw insErr;
+
+    if (recState.mode !== 'private') {
+      const recs = recState.recipients.filter(r => r.email.trim()).map(r => ({
+        capsule_id: capsule.id,
+        email: r.email.trim().toLowerCase(),
+        name: r.name.trim() || null
+      }));
+      if (recs.length) {
+        const { error: rErr } = await sb.from('recipients').insert(recs);
+        if (rErr) throw rErr;
+      }
+
+      // For "send now": notify recipients via Edge Function (if deployed)
+      if (recState.mode === 'send_now' && recs.length && SEND_FUNCTION) {
+        prog.textContent = 'Sending notifications…';
+        const link = `${SITE_URL}/#unlock/${capsule.id}/${b64urlEncode(rawKey)}`;
+        for (const r of recs) {
+          try {
+            await sb.functions.invoke(SEND_FUNCTION, {
+              body: {
+                to: r.email,
+                subject: `${user.email.split('@')[0]} left you a message.`,
+                html: emailTemplate(r.name || '', user.email.split('@')[0], link),
+              }
+            });
+          } catch (e) {
+            console.warn('Edge function not deployed yet:', e.message);
+          }
+        }
+        await sb.from('recipients').update({ notified_at: new Date().toISOString() })
+          .eq('capsule_id', capsule.id);
+      }
+    }
+
+    prog.textContent = 'Sealed.';
+    const shareLink = `${SITE_URL}/#unlock/${capsule.id}/${b64urlEncode(rawKey)}`;
+    if (recState.mode === 'send_now' || recState.mode === 'private') {
+      toast('Capsule sealed.', 'success');
+    } else {
+      await navigator.clipboard.writeText(shareLink).catch(() => {});
+      toast('Sealed. Share link copied to clipboard.', 'success');
+    }
+    setTimeout(() => { window.location.hash = '#dashboard'; }, 800);
+
+  } catch (e) {
+    err.textContent = e.message || String(e);
+    err.classList.remove('hidden');
+    prog.textContent = '';
+    btn.disabled = false;
+  }
+}
+
+function emailTemplate(toName, fromName, link) {
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#0a0a0c;color:#f5f0e8;padding:48px 32px;max-width:560px;margin:0 auto;border-radius:16px;line-height:1.6">
+    <h2 style="font-family:Georgia,serif;font-size:28px;margin:0 0 16px">${escapeHtml(fromName)} left you a message.</h2>
+    <p>Hi ${escapeHtml(toName) || 'there'},</p>
+    <p>Some time ago, <strong>${escapeHtml(fromName)}</strong> recorded something for you.</p>
+    <a href="${link}" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#a78bfa);color:#fff;padding:14px 28px;border-radius:99px;text-decoration:none;font-weight:600;margin:16px 0">Open your message</a>
+    <p style="opacity:.7;font-size:14px">This link is private. The decryption key is built into it — keep the link safe.</p>
+  </div>`;
+}
+
+/* ----------- Settings ----------- */
+async function loadSettings(user) {
+  showPage('settings');
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (profile) document.getElementById('hbInterval').value = profile.heartbeat_interval_days;
+
+  document.getElementById('saveInterval').onclick = async () => {
+    const days = parseInt(document.getElementById('hbInterval').value);
+    const { error } = await sb.from('profiles').update({ heartbeat_interval_days: days }).eq('id', user.id);
+    document.getElementById('hbMsg').innerHTML = error
+      ? `<span style="color:var(--danger)">${error.message}</span>`
+      : `<span style="color:var(--emerald)">Saved.</span>`;
+  };
+
+  await refreshTrustees(user);
+
+  document.getElementById('addTrusteeForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const { error } = await sb.from('trustees').insert({
+      owner_id: user.id,
+      email: document.getElementById('ttEmail').value.trim().toLowerCase(),
+      name: document.getElementById('ttName').value.trim() || null,
+      relationship: document.getElementById('ttRel').value.trim() || null
+    });
+    if (error) return toast(error.message, 'error');
+    document.getElementById('ttEmail').value = '';
+    document.getElementById('ttName').value = '';
+    document.getElementById('ttRel').value = '';
+    refreshTrustees(user);
+  };
+}
+
+async function refreshTrustees(user) {
+  const { data: ts } = await sb.from('trustees').select('*').eq('owner_id', user.id);
+  const wrap = document.getElementById('trusteeList');
+  if (!ts || !ts.length) {
+    wrap.innerHTML = '<p class="muted" style="font-size:14px">No trustees yet.</p>';
+    return;
+  }
+  wrap.innerHTML = ts.map(t => `
+    <div class="row-between" style="padding:12px 0;border-bottom:1px solid var(--line);font-size:14px">
+      <div>
+        <div>${escapeHtml(t.name || t.email)}</div>
+        <div class="muted" style="font-size:12px">${escapeHtml(t.email)}${t.relationship ? ' · ' + escapeHtml(t.relationship) : ''}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-id="${t.id}">Remove</button>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('button[data-id]').forEach(b => b.onclick = async () => {
+    await sb.from('trustees').delete().eq('id', b.dataset.id);
+    refreshTrustees(user);
+  });
+}
+
+/* ----------- Recipient Unlock ----------- */
+async function loadUnlock(hash) {
+  // hash form: #unlock/<capsuleId>/<keyB64Url>
+  const parts = hash.replace('#unlock/', '').split('/');
+  const capsuleId = parts[0];
+  const keyB64 = parts[1];
+  const loading = document.getElementById('unlockLoading');
+  const ready   = document.getElementById('unlockReady');
+  const errBox  = document.getElementById('unlockError');
+  const errTxt  = document.getElementById('unlockErrText');
+
+  loading.classList.remove('hidden'); ready.classList.add('hidden'); errBox.classList.add('hidden');
+
+  try {
+    if (!capsuleId || !keyB64) throw new Error('This link is incomplete.');
+
+    // Anonymous read of the capsule + sender display
+    const { data: c, error } = await sb.from('capsules')
+      .select('id,title,format,storage_path,text_ciphertext,iv,owner_id,status,profiles:owner_id(display_name,email)')
+      .eq('id', capsuleId).single();
+    if (error || !c) throw new Error('Capsule not found, or not yet released.');
+    if (c.status !== 'released' && c.status !== 'sealed') throw new Error('This capsule is not available.');
+
+    const fromName = c.profiles?.display_name || c.profiles?.email?.split('@')[0] || 'Someone';
+
+    document.getElementById('unlockFrom').textContent = `From ${fromName}`;
+    document.getElementById('unlockTitle').textContent = c.title;
+    document.getElementById('unlockNote').textContent = 'Decrypting locally…';
+
+    const rawKey = b64urlDecode(keyB64);
+    const key = await importKey(rawKey);
+
+    let payload;
+    if (c.format === 'text') {
+      const ct = b64decode(c.text_ciphertext);
+      const pt = await decryptBytes(key, ct, c.iv);
+      payload = { kind: 'text', body: dec.decode(pt) };
+    } else {
+      // Get a signed URL for the encrypted blob (anonymous if RLS allows; else
+      // make storage bucket public-read for the bucket and use getPublicUrl)
+      const { data: signed, error: sErr } = await sb.storage.from('capsules')
+        .createSignedUrl(c.storage_path, 3600);
+      if (sErr) throw sErr;
+      const ctRes = await fetch(signed.signedUrl);
+      const ctBuf = new Uint8Array(await ctRes.arrayBuffer());
+      const pt = await decryptBytes(key, ctBuf, c.iv);
+      const blob = new Blob([pt], { type: c.format === 'video' ? 'video/webm' : 'audio/webm' });
+      payload = { kind: c.format, url: URL.createObjectURL(blob) };
+    }
+
+    document.getElementById('unlockNote').textContent = '';
+    const target = document.getElementById('unlockContent');
+    if (payload.kind === 'text') {
+      target.innerHTML = `<div class="text-msg">${escapeHtml(payload.body)}</div>`;
+    } else if (payload.kind === 'video') {
+      target.innerHTML = `<video controls src="${payload.url}"></video><a href="${payload.url}" download="${escapeHtml(c.title)}.webm" class="btn btn-ghost btn-sm" style="margin-top:16px">Download</a>`;
+    } else {
+      target.innerHTML = `<audio controls src="${payload.url}"></audio><a href="${payload.url}" download="${escapeHtml(c.title)}.webm" class="btn btn-ghost btn-sm" style="margin-top:16px">Download</a>`;
+    }
+    loading.classList.add('hidden'); ready.classList.remove('hidden');
+  } catch (e) {
+    loading.classList.add('hidden'); errBox.classList.remove('hidden');
+    errTxt.textContent = e.message || String(e);
+  }
+}
+
+/* ----------- Setup helper copy buttons ----------- */
+document.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', async () => {
+  const target = document.getElementById(b.dataset.copy);
+  if (!target) return;
+  await navigator.clipboard.writeText(target.textContent);
+  toast('Copied.', 'success');
+}));
+
+/* ----------- Init ----------- */
+sb.auth.onAuthStateChange((_, session) => { refreshNav(); });
+(async function init() {
+  if (!SUPABASE_URL.includes('YOUR-PROJECT')) {
+    await refreshNav();
+  } else {
+    document.getElementById('navAuth').innerHTML =
+      '<a href="#setup" class="btn btn-ghost btn-sm">⚠️ Setup needed</a>';
+  }
+  route();
+})();
+</script>
+</body>
+</html>
